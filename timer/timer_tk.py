@@ -1,12 +1,7 @@
-# Timer GUI App written in Python
-
 from tkinter import *
 from tkinter import ttk
-from time import sleep
+# from .timer import start_timer, reset_timer, pause_timer
 
-# TODO Add sound when timer is completed
-# TODO Add visual effect when timer is completed
-# TODO Flash on tool bar when timer completed
 
 def run_timer():
     # Keeps track of time
@@ -72,7 +67,6 @@ def pause_timer(*args):
         button_pause["state"] = "disabled"
 
 
-# GUI ==========================================================================
 # Set up main Tk window and title
 root = Tk()
 root.title("Timer")
@@ -91,11 +85,6 @@ timer_mins = StringVar()
 timer_secs = StringVar(value=0)
 time_left = StringVar(value="00:00")
 time_left_float = DoubleVar()
-
-# Standard info label displayed at the top
-# info_label = ttk.Label(mainframe, text="Enter Length of Timer",
-#     font=("Helvetica", 14))
-# info_label.grid(row=0, column=1, columnspan=3)
 
 # Create label widgets for hours, mins, and secs
 time_label_hours = ttk.Label(mainframe, text="Hours")
@@ -133,5 +122,3 @@ for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
 time_entry_mins.focus() # Focus on this entry widget at startup
 root.bind('<Return>', start_timer)
 root.bind('<space>', pause_timer)
-
-root.mainloop()
