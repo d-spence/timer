@@ -1,70 +1,63 @@
 from tkinter import *
 from tkinter import ttk
-# from .timer import start_timer, reset_timer, pause_timer
+
+from timer.timer import get_formatted_time, t1
 
 
-def run_timer():
-    # Keeps track of time
+def run_timer_tk():
     global rt_callback
-    t = time_left_float.get()
-    if t >= 0 and timer_active.get() == True:
-        mins, secs = divmod(t, 60)
-        hours = mins / 60
-        if int(hours) > 0:
-            mins = mins % 60
-            time_formatted = f"{int(hours):02d}:{int(mins):02d}:{int(secs):02d}"
-        else:
-            time_formatted = f"{int(mins):02d}:{int(secs):02d}"
 
-        time_left.set(time_formatted)
-        time_left_float.set(time_left_float.get() - 1)
-        rt_callback = root.after(1000, run_timer)
+    time_left.set(get_formatted_time())
+    rt_callback = root.after(10, run_timer_tk)
 
 
 def start_timer(*args):
     # Starts the timer
+
     try:
-        if timer_active.get() == True:
-            run_timer()
-        else:
-            # Get start time and set time_left_float variable
-            t = ((int(timer_hours.get()) * 3600) + (int(timer_mins.get()) * 60) 
-                + int(timer_secs.get()))
-            time_left_float.set(float(t))
-            timer_active.set(True)
-            run_timer()
+        if t1.is_active == False:
+            t1.hours = timer_hours.get()
+            t1.mins = timer_mins.get()
+            t1.secs = timer_secs.get()
+            t1.update_initial()
+
+        t1.start() # Start/restart timer and set as active
+        run_timer_tk()
         
         # Disable start button until pause or reset button pressed
         button_start["state"] = "disabled"
         button_pause["state"] = "enabled"
-    except ValueError:
+    except NameError:
         pass
-
+        
 
 def reset_timer(*args):
-    # resets the timer and resets the time
-    if timer_active.get() == True:
-        timer_active.set(False)
-        time_left.set("00:00")
-        time_left_float.set(0.0)
+    # Resets the timer to initial state
 
-        # Disable/enable start and pause buttons
-        button_start["state"] = "enabled"
-        button_pause["state"] = "disabled"
-    else:
-        # Resets all entry fields back to zero if reset btn pressed twice
-        timer_hours.set(0)
-        timer_mins.set('')
-        timer_secs.set(0)
+    if t1.is_active == False:
+        # Resets all entry fields back to zero if reset pressed when timer is inactive
+        timer_hours.set(t1.hours_default)
+        timer_mins.set(t1.mins_default)
+        timer_secs.set(t1.secs_default)
         time_entry_mins.focus() # Focus on minutes entry field
+
+    t1.reset()
+    time_left.set("00:00.00")
+
+    # Disable/enable start and pause buttons
+    button_start["state"] = "enabled"
+    button_pause["state"] = "disabled"
 
 
 def pause_timer(*args):
     # Pauses the active timer
-    if timer_active.get() == True:
-        root.after_cancel(rt_callback)
+
+    if t1.is_active == True:
+        t1.stop()
         button_start["state"] = "enabled"
         button_pause["state"] = "disabled"
+
+    root.after_cancel(rt_callback)
 
 
 # Set up main Tk window and title
@@ -74,17 +67,15 @@ root.resizable(width=False, height=False)
 
 # Create a themed frame widget within the main window to hold UI content
 mainframe = ttk.Frame(root, padding="3 3 3 3", borderwidth=5, relief='sunken')
-mainframe.grid(row=0, column=0, sticky=(N, W, E, S), padx=10, pady=10)
+mainframe.grid(row=0, column=0, sticky=(N, W, E, S), padx=5, pady=5)
 root.columnconfigure(0, weight=1) # Expand frame if window is resized
 root.rowconfigure(0, weight=1)
 
 # Set up variable classes to track changes
-timer_active = BooleanVar(value=False)
-timer_hours = StringVar(value=0)
+timer_hours = StringVar(value=t1.hours_default)
 timer_mins = StringVar()
-timer_secs = StringVar(value=0)
-time_left = StringVar(value="00:00")
-time_left_float = DoubleVar()
+timer_secs = StringVar(value=t1.secs_default)
+time_left = StringVar(value="00:00.00")
 
 # Create label widgets for hours, mins, and secs
 time_label_hours = ttk.Label(mainframe, text="Hours")
