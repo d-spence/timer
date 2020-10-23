@@ -4,7 +4,7 @@ from tkinter import ttk
 from timer.timer import get_formatted_time, t1
 
 
-default_status_msg = "Enter a timer value..."
+default_status_msg = "Enter timer duration..."
 
 
 def run_timer_tk():
@@ -26,6 +26,8 @@ def start_timer(*args):
 
         t1.start() # Start/restart timer and set as active
         run_timer_tk()
+        status_msg.set("> Timer is running...")
+        set_time_color("green")
         
         # Disable start button until pause or reset button pressed
         button_start["state"] = "disabled"
@@ -43,13 +45,16 @@ def reset_timer(*args):
         # Resets all entry fields back to zero if reset pressed when timer is inactive
         time_left.set("00:00.00")
         timer_hours.set(t1.hours_default)
-        timer_mins.set(t1.mins_default)
+        timer_mins.set('')
         timer_secs.set(t1.secs_default)
         time_entry_mins.focus() # Focus on minutes entry field
+        status_msg.set(default_status_msg)
     else:
         time_left.set(get_formatted_time(initial_time=True)) # Reset time display
+        status_msg.set("Timer has been reset!")
 
     t1.reset()
+    set_time_color("black")
 
     # Disable/enable start and pause buttons
     button_start["state"] = "enabled"
@@ -65,37 +70,45 @@ def pause_timer(*args):
         t1.stop()
         button_start["state"] = "enabled"
         button_pause["state"] = "disabled"
+        status_msg.set("|| Timer is paused...")
+        set_time_color("red")
+
+
+def set_time_color(color, flash=True, flash_secondary="black"):
+    # Sets the color of the time label with an option to flash
+
+    time_label["foreground"] = color
+
+    # TODO -- Add logic to flash timer fg or bg colors
 
 
 # Set up main Tk window and title
 root = Tk()
 root.title("Timer")
 root.resizable(width=False, height=False)
-# root.columnconfigure(0, weight=1) # Expand frame if window is resized
-# root.rowconfigure(0, weight=1)
 
-# Create a themed frame widget within the main window to hold UI content
-mainframe = ttk.Frame(root, padding="3 3 3 3", borderwidth=5, relief='sunken')
-mainframe.grid(row=0, column=0, sticky=(N, W, E, S), padx=5, pady=5)
-
-# Create a status bar
-status_bar = ttk.Label(root, text=default_status_msg, padding="3 3 3 3",
-    borderwidth=1, relief='sunken')
-status_bar.grid(row=10, column=0)
+# style_t_running = ttk.Style(foreground="green")
 
 # Set up variable classes to track changes
+status_msg = StringVar(value=default_status_msg)
 timer_hours = StringVar(value=t1.hours_default)
-timer_mins = StringVar()
+timer_mins = StringVar() # Left empty for faster input
 timer_secs = StringVar(value=t1.secs_default)
 time_left = StringVar(value="00:00.00")
 
+# Create a themed frame widget within the main window to hold UI content
+mainframe = ttk.Frame(root, padding="5 5 5 5", borderwidth=1, relief='sunken')
+mainframe.grid(row=1, column=0, sticky=(N, W, E, S))
+
+# Create a status bar
+status_bar = ttk.Label(root, textvariable=status_msg, padding="3 3 3 3",
+    borderwidth=1, relief='sunken', anchor=W)
+status_bar.grid(row=2, column=0, columnspan=3, sticky=[W, E])
+
 # Create label widgets for hours, mins, and secs
-time_label_hours = ttk.Label(mainframe, text="Hours")
-time_label_mins = ttk.Label(mainframe, text="Mins")
-time_label_secs = ttk.Label(mainframe, text="Secs")
-time_label_hours.grid(row=1, column=1)
-time_label_mins.grid(row=1, column=2)
-time_label_secs.grid(row=1, column=3)
+time_label_hours = ttk.Label(mainframe, text="Hours").grid(row=1, column=1)
+time_label_mins = ttk.Label(mainframe, text="Mins").grid(row=1, column=2)
+time_label_secs = ttk.Label(mainframe, text="Secs").grid(row=1, column=3)
 
 # Create entry widgets for getting timer length in hours, mins, and secs
 time_entry_hours = ttk.Entry(mainframe, width=5, textvariable=timer_hours)
@@ -123,5 +136,7 @@ button_pause.grid(row=4, column=3)
 for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
 
 time_entry_mins.focus() # Focus on this entry widget at startup
+
+# Key bindings
 root.bind('<Return>', start_timer)
 root.bind('<space>', pause_timer)
