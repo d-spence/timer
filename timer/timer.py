@@ -5,8 +5,6 @@ import datetime as dt
 
 import timer.timer_tk
 
-# TODO -- Create functions for timer logic separate from tk button press functions
-
 
 class Timer:
 
@@ -36,7 +34,7 @@ class Timer:
             self.t_total += dt.timedelta(seconds=self.t_stop - self.t_start)
 
     def reset(self):
-        self.t_start = self.t_stop = None
+        self.t_start = self.t_stop = 0
         self.t_total = dt.timedelta()
         self.is_active = False
 
@@ -45,10 +43,14 @@ class Timer:
             seconds=int(self.secs))
 
 
-def get_formatted_time():
+def get_formatted_time(initial_time=False):
     # Return a formatted time string in this format HH:MM:SS.xx
 
-    t_duration = t1.t_initial - (t1.t_total + (dt.timedelta(seconds=time.time() - t1.t_start)))
+    if initial_time == True:
+        t_duration = t1.t_initial
+    else:
+        t_duration = t1.t_initial - (t1.t_total + (dt.timedelta(seconds=time.time() - t1.t_start)))
+
     t_hours = t_duration.seconds // 3600
     t_mins = t_duration.seconds // 60
     t_secs = float(f"{t_duration.seconds}.{t_duration.microseconds}") % 60

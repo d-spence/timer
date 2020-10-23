@@ -4,6 +4,9 @@ from tkinter import ttk
 from timer.timer import get_formatted_time, t1
 
 
+default_status_msg = "Enter a timer value..."
+
+
 def run_timer_tk():
     global rt_callback
 
@@ -34,15 +37,19 @@ def start_timer(*args):
 def reset_timer(*args):
     # Resets the timer to initial state
 
+    root.after_cancel(rt_callback)
+
     if t1.is_active == False:
         # Resets all entry fields back to zero if reset pressed when timer is inactive
+        time_left.set("00:00.00")
         timer_hours.set(t1.hours_default)
         timer_mins.set(t1.mins_default)
         timer_secs.set(t1.secs_default)
         time_entry_mins.focus() # Focus on minutes entry field
+    else:
+        time_left.set(get_formatted_time(initial_time=True)) # Reset time display
 
     t1.reset()
-    time_left.set("00:00.00")
 
     # Disable/enable start and pause buttons
     button_start["state"] = "enabled"
@@ -52,24 +59,29 @@ def reset_timer(*args):
 def pause_timer(*args):
     # Pauses the active timer
 
+    root.after_cancel(rt_callback)
+
     if t1.is_active == True:
         t1.stop()
         button_start["state"] = "enabled"
         button_pause["state"] = "disabled"
-
-    root.after_cancel(rt_callback)
 
 
 # Set up main Tk window and title
 root = Tk()
 root.title("Timer")
 root.resizable(width=False, height=False)
+# root.columnconfigure(0, weight=1) # Expand frame if window is resized
+# root.rowconfigure(0, weight=1)
 
 # Create a themed frame widget within the main window to hold UI content
 mainframe = ttk.Frame(root, padding="3 3 3 3", borderwidth=5, relief='sunken')
 mainframe.grid(row=0, column=0, sticky=(N, W, E, S), padx=5, pady=5)
-root.columnconfigure(0, weight=1) # Expand frame if window is resized
-root.rowconfigure(0, weight=1)
+
+# Create a status bar
+status_bar = ttk.Label(root, text=default_status_msg, padding="3 3 3 3",
+    borderwidth=1, relief='sunken')
+status_bar.grid(row=10, column=0)
 
 # Set up variable classes to track changes
 timer_hours = StringVar(value=t1.hours_default)
