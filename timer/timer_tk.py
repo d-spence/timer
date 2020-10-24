@@ -1,17 +1,33 @@
 from tkinter import *
 from tkinter import ttk
 
-from timer.timer import get_formatted_time, t1
+from timer.timer import t1, get_formatted_time, get_time_duration 
 
 
 default_status_msg = "Enter timer duration..."
 
 
-def run_timer_tk():
+def run_timer():
     global rt_callback
 
-    time_left.set(get_formatted_time())
-    rt_callback = root.after(10, run_timer_tk)
+    t_duration = get_time_duration()
+
+    # Check if timer has finished
+    if t_duration.days <= -1:
+        stop_timer()
+        set_time_color("red", flash=True) # Flash timer red when complete
+        return
+
+    time_left.set(get_formatted_time(t_duration))
+    rt_callback = root.after(10, run_timer)
+
+
+def stop_timer():
+    # Stops the timer when time is up
+
+    root.after_cancel(rt_callback)
+
+    time_left.set(get_formatted_time(reset=True))
 
 
 def start_timer(*args):
@@ -25,7 +41,7 @@ def start_timer(*args):
             t1.update_initial()
 
         t1.start() # Start/restart timer and set as active
-        run_timer_tk()
+        run_timer()
         status_msg.set("> Timer is running...")
         set_time_color("green")
         
@@ -50,7 +66,7 @@ def reset_timer(*args):
         time_entry_mins.focus() # Focus on minutes entry field
         status_msg.set(default_status_msg)
     else:
-        time_left.set(get_formatted_time(initial_time=True)) # Reset time display
+        time_left.set(get_formatted_time(reset=True)) # Reset time display
         status_msg.set("Timer has been reset!")
 
     t1.reset()
@@ -74,7 +90,7 @@ def pause_timer(*args):
         set_time_color("red")
 
 
-def set_time_color(color, flash=True, flash_secondary="black"):
+def set_time_color(color="black", flash=True, flash_secondary="black"):
     # Sets the color of the time label with an option to flash
 
     time_label["foreground"] = color
@@ -86,8 +102,6 @@ def set_time_color(color, flash=True, flash_secondary="black"):
 root = Tk()
 root.title("Timer")
 root.resizable(width=False, height=False)
-
-# style_t_running = ttk.Style(foreground="green")
 
 # Set up variable classes to track changes
 status_msg = StringVar(value=default_status_msg)

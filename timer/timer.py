@@ -43,13 +43,11 @@ class Timer:
             seconds=int(self.secs))
 
 
-def get_formatted_time(initial_time=False):
-    # Return a formatted time string in this format HH:MM:SS.xx
+def get_formatted_time(t_duration=None, reset=False):
+    # Return a formatted time string from a timedelta object (ex. HH:MM:SS.xx)
 
-    if initial_time == True:
-        t_duration = t1.t_initial
-    else:
-        t_duration = t1.t_initial - (t1.t_total + (dt.timedelta(seconds=time.time() - t1.t_start)))
+    if reset == True:
+        t_duration = t1.t_initial # Override t_duration with initial time
 
     t_hours = t_duration.seconds // 3600
     t_mins = t_duration.seconds // 60
@@ -62,6 +60,16 @@ def get_formatted_time(initial_time=False):
         t_formatted = f"{t_mins:02d}:{t_secs:05.2f}"
 
     return t_formatted
+
+
+def get_time_duration():
+    # Gets the duration of time ellapsed so far returned as a timedelta object
+
+    t_since_start = dt.timedelta(seconds=time.time() - t1.t_start) # Time since last start/unpause
+    t_ellapsed = t1.t_total + t_since_start # Time ellapsed so far
+    t_duration = t1.t_initial - t_ellapsed
+    
+    return t_duration
 
 
 # Create a new timer
