@@ -5,6 +5,7 @@ from timer.timer import t1, get_formatted_time, get_time_duration
 
 
 default_status_msg = "Enter timer duration..."
+default_time = "00:00.00"
 
 
 def run_timer():
@@ -13,9 +14,10 @@ def run_timer():
     t_duration = get_time_duration()
 
     # Check if timer has finished
-    if t_duration.days <= -1:
+    if t_duration.days < 0:
         stop_timer()
-        set_time_color("red", flash=True) # Flash timer red when complete
+        status_msg.set("Timer has finished!")
+        set_time_color("gray") # Flash timer red when complete
         return
 
     time_left.set(get_formatted_time(t_duration))
@@ -27,29 +29,26 @@ def stop_timer():
 
     root.after_cancel(rt_callback)
 
-    time_left.set(get_formatted_time(reset=True))
+    time_left.set(default_time)
 
 
 def start_timer(*args):
     # Starts the timer
 
-    try:
-        if t1.is_active == False:
-            t1.hours = timer_hours.get()
-            t1.mins = timer_mins.get()
-            t1.secs = timer_secs.get()
-            t1.update_initial()
+    if t1.is_active == False:
+        t1.hours = timer_hours.get()
+        t1.mins = timer_mins.get()
+        t1.secs = timer_secs.get()
+        t1.update_initial()
 
-        t1.start() # Start/restart timer and set as active
-        run_timer()
-        status_msg.set("> Timer is running...")
-        set_time_color("green")
-        
-        # Disable start button until pause or reset button pressed
-        button_start["state"] = "disabled"
-        button_pause["state"] = "enabled"
-    except NameError:
-        pass
+    t1.start() # Start/restart timer and set as active
+    run_timer()
+    status_msg.set("> Timer is running...")
+    set_time_color("green")
+    
+    # Disable start button until pause or reset button pressed
+    button_start["state"] = "disabled"
+    button_pause["state"] = "enabled"
         
 
 def reset_timer(*args):
@@ -59,7 +58,7 @@ def reset_timer(*args):
 
     if t1.is_active == False:
         # Resets all entry fields back to zero if reset pressed when timer is inactive
-        time_left.set("00:00.00")
+        time_left.set(default_time)
         timer_hours.set(t1.hours_default)
         timer_mins.set('')
         timer_secs.set(t1.secs_default)
@@ -90,12 +89,10 @@ def pause_timer(*args):
         set_time_color("red")
 
 
-def set_time_color(color="black", flash=True, flash_secondary="black"):
-    # Sets the color of the time label with an option to flash
+def set_time_color(color="black"):
+    # Sets the color of the time label
 
     time_label["foreground"] = color
-
-    # TODO -- Add logic to flash timer fg or bg colors
 
 
 # Set up main Tk window and title
@@ -108,7 +105,7 @@ status_msg = StringVar(value=default_status_msg)
 timer_hours = StringVar(value=t1.hours_default)
 timer_mins = StringVar() # Left empty for faster input
 timer_secs = StringVar(value=t1.secs_default)
-time_left = StringVar(value="00:00.00")
+time_left = StringVar(value=default_time)
 
 # Create a themed frame widget within the main window to hold UI content
 mainframe = ttk.Frame(root, padding="5 5 5 5", borderwidth=1, relief='sunken')
