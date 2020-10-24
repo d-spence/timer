@@ -16,8 +16,6 @@ def run_timer():
     # Check if timer has finished
     if t_duration.days < 0:
         stop_timer()
-        status_msg.set("Timer has finished!")
-        set_time_color("gray") # Flash timer red when complete
         return
 
     time_left.set(get_formatted_time(t_duration))
@@ -28,7 +26,11 @@ def stop_timer():
     # Stops the timer when time is up
 
     root.after_cancel(rt_callback)
+    root.attributes('-topmost', True) # Timer will come to the front when done
+    root.attributes('-topmost', False)
 
+    status_msg.set("Timer has finished!")
+    set_time_color("gray") # Flash timer red when complete
     time_left.set(default_time)
 
 
@@ -113,7 +115,7 @@ mainframe.grid(row=1, column=0, sticky=(N, W, E, S))
 
 # Create a status bar
 status_bar = ttk.Label(root, textvariable=status_msg, padding="3 3 3 3",
-    borderwidth=1, relief='sunken', anchor=W)
+    borderwidth=1, relief='sunken', anchor=W, background="deep sky blue")
 status_bar.grid(row=2, column=0, columnspan=3, sticky=[W, E])
 
 # Create label widgets for hours, mins, and secs
@@ -130,8 +132,8 @@ time_entry_mins.grid(row=2, column=2)
 time_entry_secs.grid(row=2, column=3)
 
 # Create a label widget to display time left
-time_label = ttk.Label(mainframe, textvariable=time_left, 
-    font=("Tahoma", 40))
+time_label = ttk.Label(mainframe, textvariable=time_left, padding="5 5 5 5",
+    font=("Tahoma", 40), borderwidth=1, relief='groove')
 time_label.grid(row=3, column=1, columnspan=3)
 
 # Define start, reset and pause buttons
