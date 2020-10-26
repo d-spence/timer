@@ -73,11 +73,10 @@ def get_time_duration():
 
 
 def play_sound(fn, sound_dir="sounds\\", loop=False):
-    # Plays a sound according to sound parameter
+    # Plays a sound specified by fn parameter
 
     cwd_path = os.getcwd()
     full_sound_path = os.path.join(cwd_path, sound_dir, fn)
-    print(full_sound_path)
 
     if loop == True:
         winsound.PlaySound(full_sound_path, 

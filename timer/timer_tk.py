@@ -14,6 +14,17 @@ color_t_run = "green"
 color_t_pause = "red"
 color_t_done = "light gray"
 
+# Sound file names
+sound_t_start = "t_start.wav"
+sound_t_reset = "t_reset.wav"
+sound_t_pause = "t_reset.wav"
+sound_t_done = "t_done.wav"
+
+# Time remaining sounds; Key value is the time in seconds
+sound_tr_dict = {'10':'tr_10_sec.wav', '30':'tr_30_sec.wav', '60':'tr_1_min.wav',
+    '300':'tr_5_min.wav', '600':'tr_10_min.wav', '1800':'tr_30_min.wav',}
+sound_tr_played = [] # Which alerts have already been played
+
 
 def run_timer():
     global rt_callback
@@ -25,21 +36,33 @@ def run_timer():
         stop_timer()
         return
 
+    # Play audio notifications for time remaining
+    for t in sound_tr_dict.keys():
+        if t not in sound_tr_played:
+            if int(t) == t_duration.seconds:
+                play_sound(sound_tr_dict[t], sound_dir="sounds\\time_remaining\\")
+                sound_tr_played.append(t)
+
     time_left.set(get_formatted_time(t_duration))
     rt_callback = root.after(10, run_timer)
 
 
 def stop_timer():
     # Stops the timer when time is up
+    global sound_tr_played
 
     root.after_cancel(rt_callback)
     root.attributes('-topmost', True) # Timer will come to the front when done
     root.attributes('-topmost', False)
+    root.focus_force() # Will flash taskbar icon if not the active window
 
-    play_sound("t_done.wav", loop=True)
+    play_sound(sound_t_done, loop=True)
+    sound_tr_played = [] # Reset time remaining played sounds
     status_msg.set("Timer has finished!")
-    set_time_color(color_t_done) # Timer text will appear light gray
+    set_time_color(color_t_done) # Timer text will appear lighter when done
     time_left.set(default_time)
+
+    button_pause["state"] = "disabled"
 
 
 def start_timer(*args):
@@ -52,7 +75,7 @@ def start_timer(*args):
         t1.update_initial()
 
     t1.start() # Start/restart timer and set as active
-    play_sound("t_start.wav")
+    play_sound(sound_t_start)
     run_timer()
     status_msg.set("> Timer is running...")
     set_time_color(color_t_run)
@@ -80,7 +103,7 @@ def reset_timer(*args):
         status_msg.set("Timer has been reset!")
 
     t1.reset()
-    play_sound("t_reset.wav")
+    play_sound(sound_t_reset)
     set_time_color(color_t_default)
 
     # Disable/enable start and pause buttons
@@ -95,7 +118,7 @@ def pause_timer(*args):
 
     if t1.is_active == True:
         t1.stop()
-        play_sound("t_pause.wav")
+        play_sound(sound_t_pause)
         button_start["state"] = "enabled"
         button_pause["state"] = "disabled"
         status_msg.set("|| Timer is paused...")
@@ -111,6 +134,7 @@ def set_time_color(color="black"):
 # Set up main Tk window and title
 root = Tk()
 root.title("Timer")
+root.iconbitmap("timer_icon.ico")
 root.resizable(width=False, height=False)
 
 # Set up variable classes to track changes
