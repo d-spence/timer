@@ -7,6 +7,13 @@ from timer.timer import t1, get_formatted_time, get_time_duration
 default_status_msg = "Enter timer duration..."
 default_time = "00:00.00"
 
+# Color values/names
+color_status_bar = "light sky blue"
+color_t_default = "black"
+color_t_run = "green"
+color_t_pause = "red"
+color_t_done = "light gray"
+
 
 def run_timer():
     global rt_callback
@@ -30,7 +37,7 @@ def stop_timer():
     root.attributes('-topmost', False)
 
     status_msg.set("Timer has finished!")
-    set_time_color("gray") # Flash timer red when complete
+    set_time_color(color_t_done) # Timer text will appear light gray
     time_left.set(default_time)
 
 
@@ -46,7 +53,7 @@ def start_timer(*args):
     t1.start() # Start/restart timer and set as active
     run_timer()
     status_msg.set("> Timer is running...")
-    set_time_color("green")
+    set_time_color(color_t_run)
     
     # Disable start button until pause or reset button pressed
     button_start["state"] = "disabled"
@@ -71,7 +78,7 @@ def reset_timer(*args):
         status_msg.set("Timer has been reset!")
 
     t1.reset()
-    set_time_color("black")
+    set_time_color(color_t_default)
 
     # Disable/enable start and pause buttons
     button_start["state"] = "enabled"
@@ -88,7 +95,7 @@ def pause_timer(*args):
         button_start["state"] = "enabled"
         button_pause["state"] = "disabled"
         status_msg.set("|| Timer is paused...")
-        set_time_color("red")
+        set_time_color(color_t_pause)
 
 
 def set_time_color(color="black"):
@@ -115,7 +122,7 @@ mainframe.grid(row=1, column=0, sticky=(N, W, E, S))
 
 # Create a status bar
 status_bar = ttk.Label(root, textvariable=status_msg, padding="3 3 3 3",
-    borderwidth=1, relief='sunken', anchor=W, background="deep sky blue")
+    borderwidth=1, relief='sunken', anchor=W, background=color_status_bar)
 status_bar.grid(row=2, column=0, columnspan=3, sticky=[W, E])
 
 # Create label widgets for hours, mins, and secs
