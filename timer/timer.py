@@ -1,6 +1,6 @@
 # Timer App - Written in Python using Tkinter GUI
 
-import time
+import time, winsound, os
 import datetime as dt
 
 import timer.timer_tk
@@ -70,6 +70,21 @@ def get_time_duration():
     t_duration = t1.t_initial - t_ellapsed
     
     return t_duration
+
+
+def play_sound(fn, sound_dir="sounds\\", loop=False):
+    # Plays a sound according to sound parameter
+
+    cwd_path = os.getcwd()
+    full_sound_path = os.path.join(cwd_path, sound_dir, fn)
+    print(full_sound_path)
+
+    if loop == True:
+        winsound.PlaySound(full_sound_path, 
+            winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
+    else:
+        winsound.PlaySound(full_sound_path, 
+            winsound.SND_FILENAME | winsound.SND_ASYNC)
 
 
 # Create a new timer

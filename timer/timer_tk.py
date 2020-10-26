@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 
-from timer.timer import t1, get_formatted_time, get_time_duration 
+from timer.timer import t1, get_formatted_time, get_time_duration, play_sound
 
 
 default_status_msg = "Enter timer duration..."
@@ -36,6 +36,7 @@ def stop_timer():
     root.attributes('-topmost', True) # Timer will come to the front when done
     root.attributes('-topmost', False)
 
+    play_sound("t_done.wav", loop=True)
     status_msg.set("Timer has finished!")
     set_time_color(color_t_done) # Timer text will appear light gray
     time_left.set(default_time)
@@ -51,6 +52,7 @@ def start_timer(*args):
         t1.update_initial()
 
     t1.start() # Start/restart timer and set as active
+    play_sound("t_start.wav")
     run_timer()
     status_msg.set("> Timer is running...")
     set_time_color(color_t_run)
@@ -78,6 +80,7 @@ def reset_timer(*args):
         status_msg.set("Timer has been reset!")
 
     t1.reset()
+    play_sound("t_reset.wav")
     set_time_color(color_t_default)
 
     # Disable/enable start and pause buttons
@@ -92,6 +95,7 @@ def pause_timer(*args):
 
     if t1.is_active == True:
         t1.stop()
+        play_sound("t_pause.wav")
         button_start["state"] = "enabled"
         button_pause["state"] = "disabled"
         status_msg.set("|| Timer is paused...")
