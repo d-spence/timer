@@ -44,22 +44,18 @@ class Timer:
 
 
 def get_formatted_time(t_duration=None, reset=False):
-    # Return a formatted time string from a timedelta object (ex. HH:MM:SS.xx)
+    # Return a formatted time string from a timedelta object
 
     if reset == True:
-        t_duration = t1.t_initial # Override t_duration with initial time
-
-    t_hours = t_duration.seconds // 3600
-    t_mins = t_duration.seconds // 60
-    t_secs = float(f"{t_duration.seconds}.{t_duration.microseconds}") % 60
-
-    if t_mins > 60:
-        t_mins = t_mins % 60 # Get remainder of minutes divided by the hour
-        t_formatted = f"{t_hours:02d}:{t_mins:02d}:{t_secs:05.2f}"
+        if t_duration.seconds >= 3600:
+            return f"{str(t_duration)}.00"
+        else:
+            return f"{str(t_duration)[2:]}.00"
     else:
-        t_formatted = f"{t_mins:02d}:{t_secs:05.2f}"
-
-    return t_formatted
+        if t_duration.seconds >= 3600:
+            return f"{str(t_duration)[0:-4]}"
+        else:
+            return f"{str(t_duration)[2:-4]}"
 
 
 def get_time_duration():

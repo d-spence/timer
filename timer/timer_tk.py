@@ -20,7 +20,7 @@ sound_t_reset = "t_reset.wav"
 sound_t_pause = "t_reset.wav"
 sound_t_done = "t_done.wav"
 
-# Time remaining sounds; Key value is the time in seconds
+# Time remaining sounds; Key is the time in seconds and value is the sound file
 sound_tr_dict = {'10':'tr_10_sec.wav', '30':'tr_30_sec.wav', '60':'tr_1_min.wav',
     '300':'tr_5_min.wav', '600':'tr_10_min.wav', '1800':'tr_30_min.wav',}
 sound_tr_played = [] # Which alerts have already been played
@@ -44,12 +44,11 @@ def run_timer():
                 sound_tr_played.append(t)
 
     time_left.set(get_formatted_time(t_duration))
-    rt_callback = root.after(10, run_timer)
+    rt_callback = root.after(10, run_timer) # Identifier used to cancel next call
 
 
 def stop_timer():
     # Stops the timer when time is up
-    global sound_tr_played
 
     root.after_cancel(rt_callback)
     root.attributes('-topmost', True) # Timer will come to the front when done
@@ -57,12 +56,12 @@ def stop_timer():
     root.focus_force() # Will flash taskbar icon if not the active window
 
     play_sound(sound_t_done, loop=True)
-    sound_tr_played = [] # Reset time remaining played sounds
     status_msg.set("Timer has finished!")
     set_time_color(color_t_done) # Timer text will appear lighter when done
     time_left.set(default_time)
 
-    button_pause["state"] = "disabled"
+    button_pause["state"] = "disabled" # Disable pause button
+    root.bind('<space>', reset_timer) # Bind space to reset function
 
 
 def start_timer(*args):
@@ -76,17 +75,20 @@ def start_timer(*args):
 
     t1.start() # Start/restart timer and set as active
     play_sound(sound_t_start)
-    run_timer()
     status_msg.set("> Timer is running...")
     set_time_color(color_t_run)
+    run_timer()
     
     # Disable start button until pause or reset button pressed
     button_start["state"] = "disabled"
     button_pause["state"] = "enabled"
+    root.focus()
+    root.bind('<space>', pause_timer) # Rebind space to pause function
         
 
 def reset_timer(*args):
     # Resets the timer to initial state
+    global sound_tr_played
 
     root.after_cancel(rt_callback)
 
@@ -99,16 +101,18 @@ def reset_timer(*args):
         time_entry_mins.focus() # Focus on minutes entry field
         status_msg.set(default_status_msg)
     else:
-        time_left.set(get_formatted_time(reset=True)) # Reset time display
+        time_left.set(get_formatted_time(t_duration=t1.t_initial, reset=True)) # Reset time display
         status_msg.set("Timer has been reset!")
 
     t1.reset()
     play_sound(sound_t_reset)
+    sound_tr_played = [] # Reset time remaining played sounds
     set_time_color(color_t_default)
 
     # Disable/enable start and pause buttons
     button_start["state"] = "enabled"
     button_pause["state"] = "disabled"
+    root.bind('<space>', start_timer) # Rebind space to start function
 
 
 def pause_timer(*args):
@@ -119,10 +123,12 @@ def pause_timer(*args):
     if t1.is_active == True:
         t1.stop()
         play_sound(sound_t_pause)
-        button_start["state"] = "enabled"
-        button_pause["state"] = "disabled"
         status_msg.set("|| Timer is paused...")
         set_time_color(color_t_pause)
+
+        button_start["state"] = "enabled"
+        button_pause["state"] = "disabled"
+        root.bind('<space>', start_timer) # Rebind space to start function
 
 
 def set_time_color(color="black"):
@@ -186,5 +192,4 @@ for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
 time_entry_mins.focus() # Focus on this entry widget at startup
 
 # Key bindings
-root.bind('<Return>', start_timer)
-root.bind('<space>', pause_timer)
+root.bind('<space>', start_timer)
